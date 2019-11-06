@@ -7,11 +7,6 @@ from nets import CDNet, CGNet
 from torch.utils.data import DataLoader
 
 
-def weight_init(net):
-    if isinstance(net, nn.Conv2d):
-        nn.init.normal_(net.weight)
-
-
 class Trainer:
     def __init__(self, save_net_path, save_img_path, dataset_path):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -28,9 +23,6 @@ class Trainer:
         if os.path.exists(os.path.join(self.save_net_path, "d_net.pth")):
             self.d_net.load_state_dict(torch.load(os.path.join(self.save_net_path, "d_net.pth")))
             self.g_net.load_state_dict(torch.load(os.path.join(self.save_net_path, "g_net.pth")))
-        # else:
-        #     self.d_net.apply(weight_init)
-        #     self.g_net.apply(weight_init)
         self.d_net.train()
         self.g_net.train()
 
@@ -41,7 +33,8 @@ class Trainer:
         while True:
             for i, (real_image, label) in enumerate(self.train_data):
                 real_image = real_image.to(self.device)
-                real_label = torch.zeros(label.size(0), 10).scatter_(1, label.reshape(label.size(0), -1), 1).to(self.device)
+                real_label = torch.zeros(label.size(0), 10).scatter_(1, label.reshape(label.size(0), -1), 1).to(
+                    self.device)
                 fake_label = torch.zeros(real_image.size(0), 10).to(self.device)
 
                 d_real_out = self.d_net(real_image)
